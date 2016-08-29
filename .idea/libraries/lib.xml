@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/eats-server/lib/joda-time-2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eats-server/lib/gson-2.6.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eats-server/lib/morphia-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eats-server/lib/nanohttpd-webserver-2.1.1-jar-with-dependencies.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eats-server/lib/mongo-java-driver-3.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

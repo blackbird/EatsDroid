@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <PreferenceCategory
+        android:title="Favorites"
+        android:key="pref_favorite_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Filters"
+        android:key="pref_filter_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <SwitchPreference
+            android:key="pref_filter_vegan"
+            android:summary=""
+            android:title="Vegan"
+            android:defaultValue="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <SwitchPreference
+            android:key="pref_filter_vegetarian"
+            android:title="Vegetarian"
+            android:defaultValue="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </PreferenceCategory>
+</PreferenceScreen>

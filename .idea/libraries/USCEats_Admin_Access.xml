@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="USCEats_Admin_Access">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/eats-server/USCEats_Admin_Access.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

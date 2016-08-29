@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="eats-server:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/eats_server_jar</output-path>
+    <root id="archive" name="eats-server.jar">
+      <element id="module-output" name="eats-server" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/morphia-1.1.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/mongo-java-driver-3.0.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/gson-2.6.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/nanohttpd-webserver-2.1.1-jar-with-dependencies.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/joda-time-2.4.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

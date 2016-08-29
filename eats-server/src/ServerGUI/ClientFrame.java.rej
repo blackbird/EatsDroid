@@ -1,0 +1,28 @@
+diff a/eats-server/src/ServerGUI/ClientFrame.java b/eats-server/src/ServerGUI/ClientFrame.java	(rejected hunks)
+@@ -223,22 +223,26 @@
+  		dateChooser.addActionListener(new ActionListener() {
+  			public void actionPerformed(ActionEvent arg0) {
+  				UIDate curr = (UIDate) dateChooser.getSelectedItem();
+ -				
+ -				Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.US);
+ -				//c.setTime(curr.getDate());
+ -				//System.out.println(curr.getDate());
+ -				//c.add(Calendar.MONTH, -1);
+ -				c.set(Calendar.YEAR, 2016); // regular year
+ -		        c.set(Calendar.MONTH, 3); // from 0 - 11
+ -		        c.set(Calendar.DATE, 13);  // from 1 - 31..
+ -				c.set(Calendar.HOUR, 0);
+ -		        c.set(Calendar.MINUTE, 0);
+ -		        c.set(Calendar.SECOND, 0);
+ -		        c.set(Calendar.MILLISECOND, 0);
+  		        
+  		        //impossible to arrive here without auth already being set
+++<<<<<<< HEAD
+ +				String JSONFormattedDate = curr.getDate().getYear() + "-" + curr.getDate().getMonth() + "-" +  curr.getDate().getDate();
+ +				Request request = new Request(auth, new Request.RequestPullMenus(JSONFormattedDate));
+++=======
++ 				Request request = new Request(auth, new Request.RequestPullMenus("2016-04-13"));
+++>>>>>>> 4f8710b29b08ad3b218b757619312afea20968bc
+  		        new Client(request, new ResponseInterface() {
+  
+  		            Response resp;
