@@ -9,6 +9,7 @@ public class ListItemParent {
     public static final int mealHeader = 1;
     public static final int sectionHeader = 2;
     public static final int foodHeader = 3;
+    public static final int dateHeader = 4;
 
     private String title;
     private FoodItem foodItem;

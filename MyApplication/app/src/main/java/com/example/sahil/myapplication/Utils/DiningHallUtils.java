@@ -19,7 +19,7 @@ public class DiningHallUtils {
 
 
     public enum MealTime {
-        BREAKFAST, LUNCH, DINNER, BRUNCH
+        BREAKFAST, LUNCH, DINNER
     }
 
     public static MealTime getCurrentMealTime() {
@@ -70,12 +70,12 @@ public class DiningHallUtils {
                 case 9:
                 case 10:
                 case 11:
+                    return MealTime.BREAKFAST;
                 case 12:
                 case 13:
                 case 14:
                 case 15:
                 case 16:
-                    return MealTime.BRUNCH;
                 case 17:
                 case 18:
                 case 19:

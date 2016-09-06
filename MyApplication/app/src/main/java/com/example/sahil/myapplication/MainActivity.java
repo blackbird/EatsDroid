@@ -1,12 +1,8 @@
 package com.example.sahil.myapplication;
 
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,19 +17,17 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.widget.DatePicker;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.example.sahil.myapplication.Utils.Alarm;
 import com.example.sahil.myapplication.Utils.CalendarUtils;
+import com.example.sahil.myapplication.Utils.DiningHallUtils;
 import com.example.sahil.myapplication.Utils.Favorites;
 import com.example.sahil.myapplication.Utils.Installation;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +36,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.Format;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,18 +76,19 @@ public class MainActivity extends AppCompatActivity {
     public static TreeMap<String, String> restaurants = new TreeMap<>();
     public static Map<String, feast.Menu> menus = new HashMap<>();
     public static Set<String> favoritesSet = new HashSet<>();
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     //private GoogleApiClient client;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        if(savedInstanceState==null)
+        if (savedInstanceState == null)
             setContentView(R.layout.activity_login);
+
 
 
         //TODO: execute as aysnchronous task to show splash page
@@ -142,31 +139,9 @@ public class MainActivity extends AppCompatActivity {
             else
                 Log.d("Aditya", "not null");
         } else {
-            if(savedInstanceState==null) {
-                loadFavorites();
-                loadRestaurants();
-            } else {
-                setContentView(R.layout.activity_main);
-                // Create the adapter that will return a fragment for each of the three
-                // primary sections of the activity.
-                mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-                // Set up the ViewPager with the sections adapter.
-                mViewPager = (ViewPager) findViewById(R.id.view_pager);
-                if (mViewPager != null) {
-                    mViewPager.setAdapter(mSectionsPagerAdapter);
-                }
-
-
-                TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-                if (tabLayout != null) {
-                    tabLayout.setupWithViewPager(mViewPager);
-                }
-                Log.w("Sahil", "OnCreate MainActivity");
-
-
-                fetchDataForDate(formatDate()); //fetch data
-            }
+            loadFavorites();
+            loadRestaurants();
         }
     }
 
@@ -216,7 +191,11 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflator = getLayoutInflater();
         View view = inflator.inflate(R.layout.activity_main, null, false);
         view.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+
+
         setContentView(view);
+
+
 
 
         //working with dates
@@ -226,8 +205,22 @@ public class MainActivity extends AppCompatActivity {
             day_x = CalendarUtils.getDay();
         }
 
+        TextView textView = (TextView)findViewById(R.id.mytitle);
+        if(textView!=null)
+            textView.setText(DiningHallUtils.getCurrentMealTime().name());
 
+
+        ImageButton imageButton = (ImageButton) findViewById(R.id.action_calendar);
+        if(imageButton!=null)
+            imageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DialogFragment newFragment = new DatePickerFragment();
+                    newFragment.show(getFragmentManager(), "MyDialog");
+                }
+            });
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
 
         // Create the adapter that will return a fragment for each of the three
@@ -253,10 +246,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+    public boolean onCreateOptionsMenu(Menu menu){
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -270,15 +264,17 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), FavoriteActivity.class);
             startActivity(intent);
             overridePendingTransition(R.animator.slide_in_right, R.animator.slide_out_left);
-        } else if (id == R.id.action_calendar) {
+        } /*else if (id == R.id.action_calendar) {
             DialogFragment newFragment = new DatePickerFragment();
+
+
             newFragment.show(getFragmentManager(), "MyDialog");
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
 
-    public Date formatDate() {
+    public static Date formatDate() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         Date date = null;
         try {
@@ -289,12 +285,25 @@ public class MainActivity extends AppCompatActivity {
         return date;
     }
 
+
+    public static String formattedFullMonthDate() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        Date date = null;
+        try {
+            date = dateFormat.parse(year_x + "/" + month_x + "/" + day_x);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Format formattedSpecs = new SimpleDateFormat("MMMM dd yyyy");
+        return formattedSpecs.format(date);
+    }
+
     /**
      * Fetch Menus based on the date
      *
      * @param date The date selected on the calendar.
      */
-    private void fetchDataForDate(Date date) {
+    public void fetchDataForDate(Date date) {
         Log.w("Sahil", "fetch menus for this date: " + date);
 
 
@@ -304,6 +313,8 @@ public class MainActivity extends AppCompatActivity {
             public void fetchedMenus(Map<String, feast.Menu> menus, VolleyError error) {
                 if (error == null) {
                     MainActivity.menus = menus;
+
+
                     if (getSupportFragmentManager().getFragments() != null) {
                         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
                             if (fragment instanceof RestaurantFragment)
@@ -324,57 +335,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
-
-
-
-    public class DatePickerFragment extends DialogFragment
-            implements DatePickerDialog.OnDateSetListener {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            int year = year_x;
-            int month = month_x - 1;
-            int day = day_x;
-
-            // Create a new instance of DatePickerDialog and return it
-            return new DatePickerDialog(getActivity(), this, year, month, day);
-//            DatePickerDialog pickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
-//            pickerDialog.getDatePicker().setMaxDate(maxDate);
-//            pickerDialog.getDatePicker().setMinDate(minDate); // System.currentTimeMillis() - 1000
-//            return pickerDialog;
-        }
-
-        public void onDateSet(DatePicker view, int year, int month, int day) {
-            // Do something with the date chosen by the user
-
-            year_x = year;
-            month_x = month + 1;
-            day_x = day;
-
-
-            fetchDataForDate(formatDate());
-
-            Log.w("Sahil", year + "-" + month + "-" + day);
-
-
-        }
-
-
-    }
-
-
-    public static class SettingsFragment extends PreferenceFragment {
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // Load the preferences from an XML resource
-            addPreferencesFromResource(R.xml.preferences);
-        }
-    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

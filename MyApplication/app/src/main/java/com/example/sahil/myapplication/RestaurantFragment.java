@@ -1,15 +1,17 @@
 package com.example.sahil.myapplication;
 
+import android.app.DialogFragment;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.sahil.myapplication.Utils.CalendarUtils;
 import com.example.sahil.myapplication.Utils.DiningHallUtils;
@@ -61,7 +63,7 @@ public class RestaurantFragment extends Fragment {
         //TODO: Replace with Load Circle/Spinner
 
 
-        listItems = new ArrayList<ListItemParent>();
+        listItems = new ArrayList<>();
         ListItemParent mealItem = new ListItemParent(ListItemParent.mealHeader);
         mealItem.setTitle(dummyMeal.getName());
         listItems.add(mealItem);
@@ -88,7 +90,6 @@ public class RestaurantFragment extends Fragment {
 
 
 
-
         //views first time creates before data for menus is retrieved
         if(savedInstanceState==null)
             if(!MainActivity.menus.isEmpty())
@@ -97,76 +98,124 @@ public class RestaurantFragment extends Fragment {
     }
 
 
-
+    private boolean isToday(){
+        int month = CalendarUtils.getMonth();
+        int day = CalendarUtils.getDay();
+        int year = CalendarUtils.getYear();
+        return !(MainActivity.month_x != month || MainActivity.day_x != day || MainActivity.year_x != year);
+    }
 
     private void updateListItems(Menu selectedMenu) {
-        if(selectedMenu.getMeals()!=null)
-            for(Meal currentMeal: selectedMenu.getMeals()) {
-                // for each Meal - make one header add it to a vector of custom parent type
-                // for each section - make a add it to a vector of custom parent type
+        myListAdapter.clearMealPositions();
 
-                ListItemParent mealItem = new ListItemParent(ListItemParent.mealHeader);
-                mealItem.setTitle(currentMeal.getName());
-                listItems.add(mealItem);
+        if (selectedMenu.getMeals() != null) {
 
-                for(Section mealSection: currentMeal.getSections()) {
-                    ListItemParent sectionItem = new ListItemParent(ListItemParent.sectionHeader);
-                    sectionItem.setTitle(mealSection.getName());
-                    listItems.add(sectionItem);
-                    if(mealSection.getFoodItems() != null) {
-                        for (FoodItem foodItem : mealSection.getFoodItems()) {
-                            ListItemParent food = new ListItemParent(ListItemParent.foodHeader);
-                            food.setTitle(foodItem.getFoodName());
-                            food.setFoodItem(foodItem);
-                            JSONObject favoritesObj = new JSONObject();
+            ListItemParent dateItem = new ListItemParent(ListItemParent.dateHeader);
+            int month = CalendarUtils.getMonth();
+            int day = CalendarUtils.getDay();
+            int year = CalendarUtils.getYear();
+            boolean restaurantClosed = false;
+            if (MainActivity.month_x != month || MainActivity.day_x != day || MainActivity.year_x != year) {
+                listItems.add(dateItem);
 
-                            try {
-                                favoritesObj.put("food_identifier", foodItem.getFoodIdentifier());
-                                favoritesObj.put("food_name", foodItem.getFoodName());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                for (Meal currentMeal : selectedMenu.getMeals()) {
+                    // for each Meal - make one header add it to a vector of custom parent type
+                    // for each section - make a add it to a vector of custom parent type
+
+
+                    ListItemParent mealItem = new ListItemParent(ListItemParent.mealHeader);
+                    mealItem.setTitle(currentMeal.getName());
+                    if (!currentMeal.getName().equals("Breakfast")) {
+                        listItems.add(mealItem);
+                        myListAdapter.addMealPosition(listItems.size()-1);
+                    }
+
+                    for (Section mealSection : currentMeal.getSections()) {
+                        ListItemParent sectionItem = new ListItemParent(ListItemParent.sectionHeader);
+                        if (mealSection.getName().trim().toLowerCase().contains("must register for access"))
+                            sectionItem.setTitle("Allergen Awareness Zone");
+                        else
+                            sectionItem.setTitle(mealSection.getName());
+                        listItems.add(sectionItem);
+                        if (mealSection.getFoodItems() != null) {
+                            for (FoodItem foodItem : mealSection.getFoodItems()) {
+                                if (foodItem.getFoodName().trim().contains("Closed")) {
+                                    restaurantClosed = true;
+                                    break;
+                                }
+                                ListItemParent food = new ListItemParent(ListItemParent.foodHeader);
+
+                                food.setTitle(foodItem.getFoodName());
+                                food.setFoodItem(foodItem);
+                                JSONObject favoritesObj = new JSONObject();
+
+                                try {
+                                    favoritesObj.put("food_identifier", foodItem.getFoodIdentifier());
+                                    favoritesObj.put("food_name", foodItem.getFoodName());
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                food.setFavorite(MainActivity.favoritesSet.contains(favoritesObj.toString()));
+                                listItems.add(food);
                             }
-                            food.setFavorite(MainActivity.favoritesSet.contains(favoritesObj.toString()));
-                            listItems.add(food);
                         }
+                        if (restaurantClosed)
+                            break;
                     }
+                    if (restaurantClosed)
+                        break;
                 }
+                if (restaurantClosed)
+                    listItems.clear();
+            } else {
+                for (Meal currentMeal : selectedMenu.getMeals()) {
+                    if (currentMeal.getName().toLowerCase().contains(DiningHallUtils.getCurrentMealTime().name().toLowerCase())) {
+                        for (Section mealSection : currentMeal.getSections()) {
+                            ListItemParent sectionItem = new ListItemParent(ListItemParent.sectionHeader);
+                            if (mealSection.getName().trim().toLowerCase().contains("must register for access"))
+                                sectionItem.setTitle("Allergen Awareness Zone");
+                            else
+                                sectionItem.setTitle(mealSection.getName());
+                            listItems.add(sectionItem);
+                            if (mealSection.getFoodItems() != null) {
+                                for (FoodItem foodItem : mealSection.getFoodItems()) {
+                                    if (foodItem.getFoodName().trim().toLowerCase().contains("closed")) {
+                                        restaurantClosed = true;
+                                        break;
+                                    }
+                                    ListItemParent food = new ListItemParent(ListItemParent.foodHeader);
+
+                                    food.setTitle(foodItem.getFoodName());
+                                    food.setFoodItem(foodItem);
+                                    JSONObject favoritesObj = new JSONObject();
+
+                                    try {
+                                        favoritesObj.put("food_identifier", foodItem.getFoodIdentifier());
+                                        favoritesObj.put("food_name", foodItem.getFoodName());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    food.setFavorite(MainActivity.favoritesSet.contains(favoritesObj.toString()));
+                                    listItems.add(food);
+                                }
+                            }
+                            if (restaurantClosed)
+                                break;
+                        }
+                        if (restaurantClosed)
+                            break;
+                    }
+
+                }
+
             }
-    }
 
 
-    public void autoScroll(View view) {
-        final ListView mealListView = (ListView) view.findViewById(R.id.mealListView);
-        if(DiningHallUtils.getCurrentMealTime()== DiningHallUtils.MealTime.BREAKFAST) {
-            mealListView.setSelection(0);
-        } else if(DiningHallUtils.getCurrentMealTime()== DiningHallUtils.MealTime.LUNCH || DiningHallUtils.getCurrentMealTime()==DiningHallUtils.MealTime.BRUNCH) {
-            Handler handler = new Handler();
-
-            final Runnable r = new Runnable() {
-                public void run() {
-                    if(myListAdapter.getMealPositions().size()>1) {
-                        ListView mealListView = (ListView) getView().findViewById(R.id.mealListView);
-                        mealListView.setSelection(myListAdapter.getMealPositions().get(1));
-                    }
-                }
-            };
-
-            handler.postDelayed(r, 1000);
-        } else if (DiningHallUtils.getCurrentMealTime() == DiningHallUtils.MealTime.DINNER) {
-            Handler handler = new Handler();
-
-            final Runnable r = new Runnable() {
-                public void run() {
-                    if(myListAdapter.getMealPositions().size()>1) {
-                        ListView mealListView = (ListView) getView().findViewById(R.id.mealListView);
-                        mealListView.setSelection(myListAdapter.getMealPositions().get(myListAdapter.getMealPositions().size()-1));
-                    }
-                }
-            };
-
-            handler.postDelayed(r, 1000);
         }
     }
+
+
+
 
 
     /**
@@ -175,6 +224,11 @@ public class RestaurantFragment extends Fragment {
      */
     public void refreshView(View view) {
         if(!MainActivity.menus.isEmpty()) {
+
+
+
+
+
             if(myListAdapter==null)
                 return;
 
@@ -183,23 +237,146 @@ public class RestaurantFragment extends Fragment {
             updateListItems(MainActivity.menus.get(diningHallID));
             myListAdapter.notifyDataSetChanged();
 
+            if(view!=null) {
+                if(listItems.size()<=1) {
+                    ListView mealListView = (ListView) view.findViewById(R.id.mealListView);
+                    mealListView.setVisibility(View.INVISIBLE);
+                    TextView textView= (TextView)view.findViewById(R.id.closed_info);
+                    textView.setVisibility(View.VISIBLE);
+                    Button button= (Button)view.findViewById(R.id.view_another_menu);
+                    button.setVisibility(View.VISIBLE);
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            DialogFragment newFragment = new DatePickerFragment();
+
+
+                            newFragment.show(getActivity().getFragmentManager(), "MyDialog");
+                        }
+                    });
 
 
 
-            autoScroll(view);
+
+                } else {
+                    ListView mealListView = (ListView) view.findViewById(R.id.mealListView);
+                    mealListView.setVisibility(View.VISIBLE);
+                    TextView textView= (TextView)view.findViewById(R.id.closed_info);
+                    textView.setVisibility(View.INVISIBLE);
+                    Button button= (Button)view.findViewById(R.id.view_another_menu);
+                    button.setVisibility(View.INVISIBLE);
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                        }
+                    });
+                }
+            }
+
+
+
+            //autoScroll(view);
 
 
         } else {
-            Log.w("Sahil", "Menus was empty");
-            Toast toast = Toast.makeText(EatsApplication.applicationContext, "Menu for " + MainActivity.restaurants.get(diningHallID) + " is empty." , Toast.LENGTH_LONG);
-            toast.show();
+            if(view!=null) {
+                ListView mealListView =  (ListView) view.findViewById(R.id.mealListView);
+                mealListView.setVisibility(View.INVISIBLE);
+                TextView textView= (TextView)view.findViewById(R.id.closed_info);
+                textView.setVisibility(View.VISIBLE);
+                Button button= (Button)view.findViewById(R.id.view_another_menu);
+                button.setVisibility(View.VISIBLE);
+
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        DialogFragment newFragment = new DatePickerFragment();
+
+
+                        newFragment.show(getActivity().getFragmentManager(), "MyDialog");
+                    }
+                });
+
+
+
+            }
         }
+
+
+
+        if(view!=null) {
+            ListView mealListView = (ListView)view.findViewById(R.id.mealListView);
+            if (!isToday()) {
+
+
+
+                    mealListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                        }
+
+                        @Override
+                        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                            Log.d("Aditya", "scroll listener is working " + myListAdapter.getMealPositions().size());
+                            ListView mealListView =  (ListView) view.findViewById(R.id.mealListView);
+
+                            if (myListAdapter.getMealPositions().size()>=2 && mealListView.getVisibility()==View.VISIBLE && getUserVisibleHint()) {
+
+
+                                Log.d("Aditya", "meal positions is working " + firstVisibleItem);
+
+                                if (firstVisibleItem >= myListAdapter.getMealPositions().get(0) && firstVisibleItem < myListAdapter.getMealPositions().get(1)) {
+                                    TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                    textView.setText("Lunch");
+                                } else if (firstVisibleItem >= myListAdapter.getMealPositions().get(1)) {
+                                    TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                    textView.setText("Dinner");
+                                } else {
+                                    TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                    textView.setText("Breakfast");
+                                }
+                            } else {
+                                TextView titleView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                titleView.setText("Closed");
+                            }
+                        }
+                    });
+
+
+
+            } else {
+                //nullify any scroll listener
+                mealListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                    }
+
+                    @Override
+                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+
+                    }
+                });
+
+                //set text to current meal time
+                TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                textView.setText(DiningHallUtils.getCurrentMealTime().name());
+
+            }
+            mealListView.setSelection(0);
+        }
+
     }
 
     /**
      * Auto Scroll if fragment created before initial fetch for data on date
      */
     public void refreshView() {
+
+
+
         if(!MainActivity.menus.isEmpty()) {
             if(myListAdapter==null)
                 return;
@@ -209,22 +386,160 @@ public class RestaurantFragment extends Fragment {
             updateListItems(MainActivity.menus.get(diningHallID));
             myListAdapter.notifyDataSetChanged();
 
-
-
-            if(getView()!=null){
-                if(MainActivity.day_x == CalendarUtils.getDay() && MainActivity.month_x == CalendarUtils.getMonth())
-                    autoScroll(getView());
-                else {
+            if(getView()!=null) {
+                if(listItems.size()<=1) {
                     ListView mealListView = (ListView) getView().findViewById(R.id.mealListView);
-                    mealListView.setSelection(0);
+                    mealListView.setVisibility(View.INVISIBLE);
+                    TextView textView= (TextView)getView().findViewById(R.id.closed_info);
+                    textView.setVisibility(View.VISIBLE);
+                    Button button= (Button)getView().findViewById(R.id.view_another_menu);
+                    button.setVisibility(View.VISIBLE);
+
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            DialogFragment newFragment = new DatePickerFragment();
+
+
+                            newFragment.show(getActivity().getFragmentManager(), "MyDialog");
+                        }
+                    });
+
+
+                } else {
+                    ListView mealListView = (ListView) getView().findViewById(R.id.mealListView);
+                    mealListView.setVisibility(View.VISIBLE);
+                    TextView textView= (TextView)getView().findViewById(R.id.closed_info);
+                    textView.setVisibility(View.INVISIBLE);
+                    Button button= (Button)getView().findViewById(R.id.view_another_menu);
+                    button.setVisibility(View.INVISIBLE);
+
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                        }
+                    });
+
                 }
             }
 
         } else {
-            Log.w("Sahil", "Menus was empty");
-            Toast toast = Toast.makeText(EatsApplication.applicationContext, "Menu for " + MainActivity.restaurants.get(diningHallID) + " is empty." , Toast.LENGTH_LONG);
-            toast.show();
+           if(getView()!=null) {
+               ListView mealListView =  (ListView) getView().findViewById(R.id.mealListView);
+               mealListView.setVisibility(View.INVISIBLE);
+               TextView textView= (TextView)getView().findViewById(R.id.closed_info);
+               textView.setVisibility(View.VISIBLE);
+               Button button= (Button)getView().findViewById(R.id.view_another_menu);
+               button.setVisibility(View.VISIBLE);
+               button.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View v) {
+                       DialogFragment newFragment = new DatePickerFragment();
+
+
+                       newFragment.show(getActivity().getFragmentManager(), "MyDialog");
+                   }
+               });
+
+
+
+           }
+        }
+
+
+
+        if(getView()!=null) {
+            ListView mealListView = (ListView)getView().findViewById(R.id.mealListView);
+            Log.d("Aditya", "Visisbility "+ mealListView.getVisibility());
+            if (!isToday()) {
+                mealListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                    }
+
+                    @Override
+                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                        Log.d("Aditya", "scroll listener is working " + myListAdapter.getMealPositions().size());
+                        ListView mealListView = (ListView)getView().findViewById(R.id.mealListView);
+                        if(myListAdapter.getMealPositions().size()>=2 && listItems.size()>2 && mealListView.getVisibility()==View.VISIBLE && getUserVisibleHint()) {
+
+
+
+                            Log.d("Aditya", "meal positions is working " + firstVisibleItem);
+
+                            if (firstVisibleItem >= myListAdapter.getMealPositions().get(0) && firstVisibleItem < myListAdapter.getMealPositions().get(1)) {
+                                TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                textView.setText("Lunch");
+                            } else if (firstVisibleItem >= myListAdapter.getMealPositions().get(1)) {
+                                TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                textView.setText("Dinner");
+                            } else {
+                                TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                                textView.setText("Breakfast");
+                            }
+                        } else {
+                            TextView titleView = (TextView) getActivity().findViewById(R.id.mytitle);
+                            titleView.setText("Closed");
+                        }
+                    }
+                });
+            } else {
+                //nullify any scroll listener
+                mealListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                    }
+
+                    @Override
+                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+
+                    }
+                });
+
+                //set text to current meal time
+                TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                textView.setText(DiningHallUtils.getCurrentMealTime().name());
+
+            }
+            mealListView.setSelection(0);
         }
     }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(isVisibleToUser){
+            if(getView()!=null) {
+                ListView listView = (ListView) getView().findViewById(R.id.mealListView);
+                if(listView.getVisibility()==View.INVISIBLE) {
+
+                    TextView titleView = (TextView) getActivity().findViewById(R.id.mytitle);
+                    titleView.setText("Closed");
+                } else {
+                    if(myListAdapter.getMealPositions().size()>=2 && listItems.size()>2) {
+
+
+
+                        Log.d("Aditya", "meal positions is working " + listView.getFirstVisiblePosition());
+                        if (listView.getFirstVisiblePosition() >= myListAdapter.getMealPositions().get(0) && listView.getFirstVisiblePosition() < myListAdapter.getMealPositions().get(1)) {
+                            TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                            textView.setText("Lunch");
+                        } else if (listView.getFirstVisiblePosition() >= myListAdapter.getMealPositions().get(1)) {
+                            TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                            textView.setText("Dinner");
+                        } else {
+                            TextView textView = (TextView) getActivity().findViewById(R.id.mytitle);
+                            textView.setText("Breakfast");
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
 }
 

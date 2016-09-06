@@ -7,5 +7,21 @@
     </style>
     <style name="mealtitlestyle" parent="@style/AppTheme">
         <item name="android:fontFamily">san-serif-light</item>
+
     </style>
+
+
+
+    <style name="sanserif" parent="@style/AppTheme">
+        <item name="android:fontFamily">san-serif-light</item>
+
+    </style>
+    <style name="feedbacktitle" parent="@style/sanserif">
+
+        <item name="android:textSize">12sp</item>b
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
 </resources>

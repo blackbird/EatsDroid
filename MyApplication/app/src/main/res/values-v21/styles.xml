@@ -5,5 +5,19 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:datePickerDialogTheme">@style/DialogTheme</item>
+    </style>
+    <style name="mealtitlestyle" parent="@style/AppTheme">
+        <item name="android:fontFamily">san-serif-light</item>
+        <item name="android:letterSpacing"> 0.3 </item>
+    </style>
+
+    <style name="feedbacktitle" parent="@style/sanserif">
+
+        <item name="android:textSize">12sp</item>b
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.2</item>
     </style>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.sahil.myapplication;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -37,6 +38,7 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
     // be sure to check that you overloaded the right constructor
     public MyListAdapter(Context context, int resource, ArrayList<ListItemParent> objects) {
         super(context, resource, objects);
+
         this.objects = objects;
         this.context = context;
         mealPositions.clear();
@@ -60,37 +62,57 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
 
 
             if (itemViewType == ListItemParent.mealHeader) {
-                if(!mealPositions.contains(position)) {
-                    mealPositions.add(position);
-                }
+
                 view = inflater.inflate(R.layout.meal_header_row, null);
                 TextView mealSeparator = (TextView) view.findViewById(R.id.mealSeparator);
-                mealSeparator.setText(currentItem.getTitle());
-            } else if (itemViewType == ListItemParent.sectionHeader) {
+                String formattedMealSeparator = "-" + currentItem.getTitle() + "-";
+                mealSeparator.setText(formattedMealSeparator);
+            } else if (itemViewType == ListItemParent.sectionHeader)
+
+            {
                 view = inflater.inflate(R.layout.section_item_row, null);
                 TextView sectionSeparator = (TextView) view.findViewById(R.id.sectionSeparator);
                 sectionSeparator.setText(currentItem.getTitle());
                 setBackgroundHeader(currentItem.getTitle(), view.findViewById(R.id.section_layout));
-            } else if(itemViewType == ListItemParent.foodHeader)  {
+            }  else if(itemViewType == ListItemParent.dateHeader) {
+                view = inflater.inflate(R.layout.date_header_row, null);
+                TextView dateHeader = (TextView) view.findViewById(R.id.headerdate);
+                dateHeader.setText(MainActivity.formattedFullMonthDate());
+            }else if(itemViewType == ListItemParent.foodHeader)  {
                 view = inflater.inflate(R.layout.food_item_row, null);
                 TextView foodItemName = (TextView) view.findViewById(R.id.food_item_text);
                 foodItemName.setText(currentItem.getTitle());
-                SpannableString ss = new SpannableString(currentItem.getTitle() + "     ");
+                SpannableString ss = new SpannableString(currentItem.getTitle() + "          ");
                 if(position%2 ==0) {
 
+                    view.setBackgroundColor(Color.WHITE);
+                } else {
                     view.setBackgroundColor(getContext().getResources().getColor(R.color.colorRowSecondary));
+
                 }
 
 
                 if (currentItem.getFoodItem().isV()) {
-                    Drawable drawable = getContext().getResources().getDrawable(R.drawable.iconvegetarian);
-                    if(drawable!=null)
+                    Drawable drawable = getContext().getResources().getDrawable(R.drawable.iconvegan);
+                    if (drawable != null)
                         drawable.setBounds(0, 0, 30, 30);
                     ImageSpan imagespan = new ImageSpan(drawable);
-                    ss.setSpan(imagespan,currentItem.getTitle().length()+2,currentItem.getTitle().length()+5, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    ss.setSpan(imagespan, currentItem.getTitle().length() + 2, currentItem.getTitle().length() + 5, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    if (currentItem.getFoodItem().isVT()) {
+                        drawable = getContext().getResources().getDrawable(R.drawable.iconvegetarian);
+                        if (drawable != null)
+                            drawable.setBounds(0, 0, 30, 30);
 
-                }
-                if (currentItem.getFoodItem().isVT()) {
+
+                        imagespan = new ImageSpan(drawable);
+
+
+                        ss.setSpan(imagespan, currentItem.getTitle().length() + 7, currentItem.getTitle().length() + 10, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+
+                    }
+
+                } else if (currentItem.getFoodItem().isVT()) {
                     Drawable drawable = getContext().getResources().getDrawable(R.drawable.iconvegetarian);
                     if(drawable!=null)
                         drawable.setBounds(0, 0, 30, 30);
@@ -169,7 +191,7 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
             name = name.trim().toLowerCase();
             if (name.contains("americana")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.americana);
-            } else if (name.contains("bistro")) {
+            } else if (name.contains("bistro") || name.contains("expo station")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.bistro);
             } else if (name.contains("bread")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.bread);
@@ -177,7 +199,7 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
                 backgroundHeaderView.setBackgroundResource(R.drawable.eurasia);
             } else if (name.contains("deli")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.deli);
-            } else if (name.contains("fruit")) {
+            } else if (name.contains("fruit") || name.contains("fresh from the") ) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.fruit);
             } else if (name.contains("grainery")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.grainery);
@@ -189,7 +211,7 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
                 backgroundHeaderView.setBackgroundResource(R.drawable.mongolian);
             } else if (name.contains("pastries")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.pastries);
-            } else if (name.contains("pie")) {
+            } else if (name.contains("pie") || name.contains("slice of pi")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.pie);
             } else if (name.contains("pizza")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.pizza);
@@ -199,6 +221,10 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
                 backgroundHeaderView.setBackgroundResource(R.drawable.soup);
             } else if (name.contains("treats")) {
                 backgroundHeaderView.setBackgroundResource(R.drawable.treats);
+            } else if(name.contains("allerg")) {
+                backgroundHeaderView.setBackgroundResource(R.drawable.allergy);
+            } else {
+                backgroundHeaderView.setBackgroundResource(R.drawable.entree);
             }
         }
     }
@@ -206,6 +232,17 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
     public ArrayList<Integer> getMealPositions() {
         return mealPositions;
     }
+
+    public void clearMealPositions() {
+        mealPositions.clear();
+    }
+
+    public void addMealPosition(int position) {
+        mealPositions.add(position);
+    }
+
+
+
 
     /**
      * get food item type
@@ -217,6 +254,8 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
             return ListItemParent.sectionHeader;
         } else if(currentItem.getType()==ListItemParent.foodHeader) {
             return ListItemParent.foodHeader;
+        } else if(currentItem.getType() == ListItemParent.dateHeader) {
+            return ListItemParent.dateHeader;
         } else {
             return -1;
         }

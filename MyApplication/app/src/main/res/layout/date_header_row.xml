@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#000">
+
+
+
+
+        <LinearLayout
+            android:id="@+id/section_layout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="vertical"
+            android:gravity="center"/>
+
+
+            <TextView
+                android:id="@+id/headerdate"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:text="Section"
+                android:textAllCaps="true"
+                android:textColor="@color/colorSecondary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                />
+    </FrameLayout>
+</LinearLayout>

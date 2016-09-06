@@ -3,6 +3,8 @@
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#D8383C</color>
-    <color name="colorSecondary">#A9A9A9</color>
-    <color name="colorRowSecondary">#F9F9F9</color>
+    <color name="colorSecondary">#9C9C9C</color>
+    <color name="colorRowSecondary">#F3F3F3</color>
+    <color name="colorClosedRestaurant">#555555</color>
+    <color name="rowdividers">#CCCCCC</color>
 </resources>
