@@ -1,5 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -9,7 +13,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,8 +27,31 @@
             android:padding="5dp"
             android:layout_marginLeft="10dp"/>
         </FrameLayout>
-        <ListView
+        <com.example.sahil.myapplication.NonScrollListView
             android:id="@+id/favorite_listview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/feedbacktitle"
+                android:text="@string/filters"
+                android:padding="5dp"
+                android:layout_marginLeft="10dp"/>
+        </FrameLayout>
+        <com.example.sahil.myapplication.NonScrollListView
+            android:id="@+id/filter_listview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -44,7 +72,7 @@
                 android:padding="5dp"
                 android:layout_marginLeft="10dp"/>
         </FrameLayout>
-        <ListView
+        <com.example.sahil.myapplication.NonScrollListView
             android:id="@+id/feedback_listview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -78,7 +106,9 @@
             android:layout_width="150dp"
             android:layout_height="21dp"
             android:background="@drawable/blackbird"
+            android:layout_marginBottom="25dp"
             android:id="@+id/blackbird"/>
     </LinearLayout>
 
 </LinearLayout>
+</ScrollView>

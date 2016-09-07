@@ -2,6 +2,7 @@ package com.example.sahil.myapplication;
 
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -17,17 +18,20 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amplitude.api.Amplitude;
 import com.android.volley.VolleyError;
 import com.example.sahil.myapplication.Utils.Alarm;
 import com.example.sahil.myapplication.Utils.CalendarUtils;
 import com.example.sahil.myapplication.Utils.DiningHallUtils;
 import com.example.sahil.myapplication.Utils.Favorites;
 import com.example.sahil.myapplication.Utils.Installation;
+import com.example.sahil.myapplication.Utils.Network;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,11 +71,14 @@ public class MainActivity extends AppCompatActivity {
      */
     @Bind(R.id.view_pager)
     ViewPager mViewPager;
+    public static boolean loading = true;
 
 
     public static int day_x = -1;
     public static int month_x = -1;
     public static int year_x = -1;
+
+
 
     public static TreeMap<String, String> restaurants = new TreeMap<>();
     public static Map<String, feast.Menu> menus = new HashMap<>();
@@ -85,65 +92,84 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        if (savedInstanceState == null)
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // if (savedInstanceState == null) {
             setContentView(R.layout.activity_login);
 
+        //}
+
+        AsyncTask<String, Void, Void> task = new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground(String... params) {
+                //Turn on Amplitude Statistics
+                Amplitude.getInstance().initialize(getApplicationContext(), "f5438c63378f415d7762b84b9e0fe5bf").enableForegroundTracking(getApplication());
+                Amplitude.getInstance().trackSessionEvents(true);
+                File installation = new File(getApplicationContext().getFilesDir(), Installation.INSTALLATION);
+                if (!installation.exists()) {
+                    //TODO: Network check because this is first load of data
+                    Installation.id(getApplicationContext());
+                    Amplitude.getInstance().setUserId(Installation.id(getApplicationContext())); //installation for analytics server
 
 
-        //TODO: execute as aysnchronous task to show splash page
-        /**
-         * registering user for favoriting
-         */
-        File installation = new File(getApplicationContext().getFilesDir(), Installation.INSTALLATION);
-        if (!installation.exists()) {
-            //TODO: Network check because this is first load of data
-            Installation.id(getApplicationContext());
-            FeastAPI.sharedAPI.registerUser(new FeastAPI.CreateUserCallback() {
-                @Override
-                public void registeredUser(JSONObject response, VolleyError error) {
-                    if (error == null) {
-
-                        JSONObject object = new JSONObject();
-                        try {
-                            object.put("_id", response.getString("_id"));
-                            object.put("_etag", response.getString("_etag"));
-                            object.put("installation_id", Installation.id(getApplicationContext()));
-                            File installation = new File(getApplicationContext().getFilesDir(), Installation.INSTALLATION);
-                            Installation.rewriteInstallationFile(installation, object.toString());
+                    JSONObject object = new JSONObject();
+                    try {
+                        //object.put("_id", response.getString("_id"));
+                        //object.put("_etag", response.getString("_etag"));
+                        object.put("installation_id", Installation.id(getApplicationContext()));
+                        //File installation = new File(getApplicationContext().getFilesDir(), Installation.INSTALLATION);
+                        Installation.rewriteInstallationFile(installation, object.toString());
+                        if(Constants.FAVORITES_SWITCH)
                             loadFavorites();
-                            loadRestaurants();
-                        } catch (JSONException | IOException e) {
-                            e.printStackTrace();
-                            Log.w("Sahil", "Error getting data: " + e.getMessage());
-                            Toast toast = Toast.makeText(EatsApplication.applicationContext, "Failed to register user. ", Toast.LENGTH_LONG);
-                            toast.show();
-                        }
 
-
-                    } else {
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
+                        Log.w("Sahil", "Error getting data: " + e.getMessage());
                         Toast toast = Toast.makeText(EatsApplication.applicationContext, "Failed to register user. ", Toast.LENGTH_LONG);
                         toast.show();
-
-
-                        Log.w("Sahil", "Error getting data: " + error.toString());
                     }
+
+
+
+                    Alarm.setAlarmManager(getApplicationContext());
+                    Intent service = new Intent(getApplicationContext(), AlarmService.class);
+                    if (getApplicationContext().startService(service) != null)
+                        getApplicationContext().startService(service);
+                    else
+                        Log.d("Aditya", "not null");
+                } else {
+                    if(Constants.FAVORITES_SWITCH)
+                        loadFavorites();
+
+
+
+                    // Log.d("Aditya", "Adding log to see if instant replay now works");
                 }
-            });
+                return null;
+            }
+            @Override
+            protected void onPostExecute (Void results) {
+                loadRestaurants();
+
+            }
+
+        };
+        task.execute("");
 
 
-            Alarm.setAlarmManager(getApplicationContext());
-            Intent service = new Intent(getApplicationContext(), AlarmService.class);
-            if (getApplicationContext().startService(service) != null)
-                getApplicationContext().startService(service);
-            else
-                Log.d("Aditya", "not null");
-        } else {
 
-            loadFavorites();
-            loadRestaurants();
-        }
+
+
+
+
+
+
+
+
+
     }
+
+
+
 
     /**
      * Load list of favorites
@@ -170,14 +196,37 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void fetchedRestaurants(TreeMap<String, String> restaurants, VolleyError error) {
                 if (error == null) {
-
-                    MainActivity.restaurants = restaurants;
-                    loadActivity();
+                    if(restaurants!=null && restaurants.size()>0)
+                        MainActivity.restaurants = restaurants;
+                        loadActivity();
+                   // Log.d("Aditya", "Loaded");
 
 
                 } else {
-                    Toast toast = Toast.makeText(EatsApplication.applicationContext, "Failed to fetch restaurants.", Toast.LENGTH_LONG);
-                    toast.show();
+                    if(!Network.isNetworkAvailable(getApplicationContext())) {
+                        Toast toast = Toast.makeText(EatsApplication.applicationContext, "Please Connect to the Internet", Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        if(MainActivity.restaurants!=null) {
+                            if (MainActivity.restaurants.size() == 0) {
+                                jsonObject.put("error message", error.toString());
+                                Amplitude.getInstance().logEvent("Splash Screen Freeze", jsonObject);
+                                Toast toast = Toast.makeText(EatsApplication.applicationContext, "Restart the App, Error Occurred", Toast.LENGTH_LONG);
+                                toast.show();
+                            }
+                        } else {
+                            jsonObject.put("error message", error.toString());
+                            Amplitude.getInstance().logEvent("Splash Screen Freeze", jsonObject);
+                            Toast toast = Toast.makeText(EatsApplication.applicationContext, "Restart the App, Error Occurred", Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
 
                     Log.w("Sahil", "Error getting data: " + error.toString());
@@ -238,10 +287,21 @@ public class MainActivity extends AppCompatActivity {
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mViewPager);
         }
-        Log.w("Sahil", "OnCreate MainActivity");
 
 
         fetchDataForDate(formatDate()); //fetch data
+    }
+
+
+
+
+
+
+    public static abstract class MyRunnable implements Runnable {
+        View view;
+        public MyRunnable(View view){
+            this.view = view;
+        }
     }
 
 
@@ -261,9 +321,12 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(getApplicationContext(), FavoriteActivity.class);
+
+            Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
             startActivity(intent);
-            overridePendingTransition(R.animator.slide_in_right, R.animator.slide_out_left);
+            finish();
+            this.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+
         } /*else if (id == R.id.action_calendar) {
             DialogFragment newFragment = new DatePickerFragment();
 
@@ -298,11 +361,9 @@ public class MainActivity extends AppCompatActivity {
         return formattedSpecs.format(date);
     }
 
-    /**
-     * Fetch Menus based on the date
-     *
-     * @param date The date selected on the calendar.
-     */
+
+
+
     public void fetchDataForDate(Date date) {
         Log.w("Sahil", "fetch menus for this date: " + date);
 
@@ -314,13 +375,13 @@ public class MainActivity extends AppCompatActivity {
                 if (error == null) {
                     MainActivity.menus = menus;
 
-
                     if (getSupportFragmentManager().getFragments() != null) {
                         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
                             if (fragment instanceof RestaurantFragment)
                                 ((RestaurantFragment) fragment).refreshView();
                         }
                     }
+
 
                 } else {
                     Toast toast = Toast.makeText(EatsApplication.applicationContext, "Failed to fetch menu data. ", Toast.LENGTH_LONG);
@@ -372,6 +433,8 @@ public class MainActivity extends AppCompatActivity {
         public int getCount() {
             return restaurants.size();
         }
+
+
 
         @Override
         public CharSequence getPageTitle(int position) {

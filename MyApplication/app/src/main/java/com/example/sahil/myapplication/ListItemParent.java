@@ -49,6 +49,15 @@ public class ListItemParent {
     public boolean isFavorite() {
         return isFavorite;
     }
+    @Override
+    public boolean equals (Object otherObject) {
+        if(otherObject instanceof ListItemParent) {
+
+            ListItemParent other = (ListItemParent) otherObject;
+            return title.contains(other.getTitle()) || other.getTitle().contains(title);
+        } else
+            return false;
+    }
 
 
 }

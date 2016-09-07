@@ -7,6 +7,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.DatePicker;
 
+import com.amplitude.api.Amplitude;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by adityaaggarwal on 9/5/16.
  */
@@ -19,6 +24,16 @@ public class DatePickerFragment extends DialogFragment
         int year = MainActivity.year_x;
         int month = MainActivity.month_x - 1;
         int day = MainActivity.day_x;
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put("year",year);
+            jsonObject.put("month", month+1);
+            jsonObject.put("day", day);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Amplitude.getInstance().logEvent("Date Chosen on Calendar", jsonObject);
 
         // Create a new instance of DatePickerDialog and return it
         return new DatePickerDialog(getActivity(),R.style.DialogTheme, this, year, month, day);

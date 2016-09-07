@@ -4,6 +4,7 @@
     android:baselineAligned="false"
     android:orientation="horizontal"
     android:gravity="center_vertical"
+    android:background="#FFF"
     >
 
     <FrameLayout
@@ -26,12 +27,13 @@
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:layout_marginLeft="10dp"
-                    android:id="@+id/food_item_text"
+                    android:id="@+id/filter_item_text"
                     android:text="Test Text"
                     style="@style/eatsrow"
+                    android:textSize="14sp"
                     android:textColor="#000000"
                     android:padding="5dp"
-                    
+
                     android:layout_gravity="center_vertical"
                     />
             </LinearLayout>
@@ -41,16 +43,18 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:visibility="gone">
+
+                android:orientation="horizontal">
 
 
-                <CheckBox
+                <ToggleButton
+                    android:id="@+id/filter_toggle"
+                    android:background="@drawable/toggle_button"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/checkbox"
-                    android:button="@drawable/button"
-                    android:layout_marginRight="10dp"/>
+                    android:layout_height="35dp"
+                    android:layout_marginRight="10dp"
+
+                    />
 
                 <!--android:button="@drawable/star"
                  android:drawableLeft="@drawable/star"

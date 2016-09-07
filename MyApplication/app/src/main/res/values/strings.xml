@@ -8,9 +8,12 @@
     <!-- Strings related to login -->
 
     <string name="closed_restaurant">Restaurant Closed</string>
+    <string name="no_menu_available">No Menu Available</string>
+    <string name="no_internet_connection">Try Connecting to the Internet?</string>
     <string name="view_another_menu">View another menu</string>
     <string name="feedback" >Feedback</string>
     <string name="favorites">Favorites</string>
+    <string name="filters">Filters</string>
     <string name="settings_footer_1">Please be aware that ingredients and allergen info can change daily.</string>
     <string name="settings_footer_2">We strive to provide a large selection of products for customers who have special dietary needs. Despite making every precaution, we cannot guarantee that our items are free of trace amounts of peanuts, tree nuts, wheat, dairy, eggs, soy, shellfish, fish or other allergens.</string>
 </resources>

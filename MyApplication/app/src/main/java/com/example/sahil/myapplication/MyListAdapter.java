@@ -78,12 +78,12 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
                 view = inflater.inflate(R.layout.date_header_row, null);
                 TextView dateHeader = (TextView) view.findViewById(R.id.headerdate);
                 dateHeader.setText(MainActivity.formattedFullMonthDate());
-            }else if(itemViewType == ListItemParent.foodHeader)  {
+            }else if(itemViewType == ListItemParent.foodHeader) {
                 view = inflater.inflate(R.layout.food_item_row, null);
                 TextView foodItemName = (TextView) view.findViewById(R.id.food_item_text);
                 foodItemName.setText(currentItem.getTitle());
                 SpannableString ss = new SpannableString(currentItem.getTitle() + "          ");
-                if(position%2 ==0) {
+                if (position % 2 == 0) {
 
                     view.setBackgroundColor(Color.WHITE);
                 } else {
@@ -114,33 +114,30 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
 
                 } else if (currentItem.getFoodItem().isVT()) {
                     Drawable drawable = getContext().getResources().getDrawable(R.drawable.iconvegetarian);
-                    if(drawable!=null)
+                    if (drawable != null)
                         drawable.setBounds(0, 0, 30, 30);
 
 
                     ImageSpan imagespan = new ImageSpan(drawable);
 
 
-                    ss.setSpan(imagespan,currentItem.getTitle().length()+2,currentItem.getTitle().length()+5, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    ss.setSpan(imagespan, currentItem.getTitle().length() + 2, currentItem.getTitle().length() + 5, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
 
                 }
                 foodItemName.setText(ss);
 
 
+                if (Constants.FAVORITES_SWITCH) {
+                    final CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox);
+                    checkBox.setChecked(currentItem.isFavorite());
 
 
-                final CheckBox checkBox = (CheckBox)view.findViewById(R.id.checkbox);
-                checkBox.setChecked(currentItem.isFavorite());
+                    final FoodItem foodItem = currentItem.getFoodItem();
 
-
-                final FoodItem foodItem = currentItem.getFoodItem();
-
-                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-                {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                    {
+                    checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                             //update for view
                             checkBox.setChecked(isChecked);
 
@@ -148,13 +145,13 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
 
                             JSONObject foodObj = new JSONObject();
 
-                        try {
-                            foodObj.put("food_name",foodItem.getFoodName());
-                            foodObj.put("food_identifier", foodItem.getFoodIdentifier());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        if(isChecked)
+                            try {
+                                foodObj.put("food_name", foodItem.getFoodName());
+                                foodObj.put("food_identifier", foodItem.getFoodIdentifier());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            if (isChecked)
                                 MainActivity.favoritesSet.add(foodObj.toString());
                             else
                                 MainActivity.favoritesSet.remove(foodObj.toString());
@@ -165,7 +162,7 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
                             FeastAPI.sharedAPI.updateFavoritesWithCompletion(foodItem, new FeastAPI.RequestCallback() {
                                 @Override
                                 public void requestFinishedWithSuccess(Boolean success, VolleyError error) {
-                                    if(!success) {
+                                    if (!success) {
                                         Log.d("Aditya", "Error:" + error.getMessage());
                                         error.printStackTrace();
                                         Toast toast = Toast.makeText(EatsApplication.applicationContext, "Failed to update favorites. ", Toast.LENGTH_LONG);
@@ -175,11 +172,12 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
                             }, isChecked);
 
 
-                    }
+                        }
 
 
-                });
+                    });
 
+                }
             }
 
         return view;

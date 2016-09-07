@@ -5,6 +5,7 @@
     android:background="@drawable/splash"
     android:orientation="vertical"
     tools:context=".MainActivity"
+    android:id="@+id/splash"
     android:weightSum="1">
 
 

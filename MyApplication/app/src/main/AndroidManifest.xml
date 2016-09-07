@@ -10,8 +10,8 @@
     <application
         android:name=".EatsApplication"
         android:allowBackup="true"
-
-        android:label=""
+        android:title="Eats"
+        android:label="Eats"
         android:icon="@drawable/eats"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -20,6 +20,7 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
+            android:label=""
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,6 +32,7 @@
 
 
         <activity android:name=".FavoriteActivity"
+            android:label=""
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

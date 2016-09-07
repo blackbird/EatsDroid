@@ -93,7 +93,7 @@ public class FeastAPI
      * @param callback
      */
     public void fetchRestaurantsWithCompletion(final RestaurantsCallback callback) {
-       String cache = VolleySingleton.getInstance(context).getFromCache(this.baseURL + "/restaurants");
+       String cache = VolleySingleton.getInstance(context).getFromCache(baseURL + "/restaurants");
         if(!cache.equals("")){
             JSONObject responseObject = null;
             try {
@@ -128,7 +128,7 @@ public class FeastAPI
 
             callback.fetchedRestaurants(restaurants, null);
         } else {
-            StringRequest request = new StringRequest(Request.Method.GET, this.baseURL + "/restaurants", new Response.Listener<String>() {
+            StringRequest request = new StringRequest(Request.Method.GET, baseURL + "/restaurants", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String responseString) {
                     JSONObject responseObject = null;
@@ -161,6 +161,7 @@ public class FeastAPI
                     }
 
                     callback.fetchedRestaurants(restaurants, null);
+
                 }
 
             }, new Response.ErrorListener() {
@@ -171,7 +172,7 @@ public class FeastAPI
             }) {
                 @Override
                 protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                    try {
+
                         Cache.Entry cacheEntry = HttpHeaderParser.parseCacheHeaders(response);
                         if (cacheEntry == null) {
                             cacheEntry = new Cache.Entry();
@@ -182,6 +183,7 @@ public class FeastAPI
                         final long softExpire = now + cacheHitButRefreshed;
                         final long ttl = now + cacheExpired;
                         cacheEntry.data = response.data;
+                        String dataTest = cacheEntry.data.toString();
                         cacheEntry.softTtl = softExpire;
                         cacheEntry.ttl = ttl;
                         String headerValue;
@@ -194,14 +196,38 @@ public class FeastAPI
                             cacheEntry.lastModified = HttpHeaderParser.parseDateAsEpoch(headerValue);
                         }
                         cacheEntry.responseHeaders = response.headers;
-                        final String jsonString = new String(response.data,
-                                HttpHeaderParser.parseCharset(response.headers));
+                            String jsonString="";
+                            try {
+                                jsonString = new String(response.data,
+                                        "UTF-8");
+                            }catch (UnsupportedEncodingException e) {
+                                Log.d("Error", "Error: Volley Restaurants" + e.getMessage());
+                                e.printStackTrace();
+                                return Response.error(new ParseError(e));
+                            }
                         return Response.success(jsonString, cacheEntry);
-                    } catch (UnsupportedEncodingException e) {
-                        return Response.error(new ParseError(e));
-                    }
+
+
                 }
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String>  params = new HashMap<String, String>();
+
+                    params.put("Content-Type", "application/json");
+                    return params;
+                }
+                //In your extended request class
+                @Override
+                protected VolleyError parseNetworkError(VolleyError volleyError){
+                    if(volleyError.networkResponse != null && volleyError.networkResponse.data != null){
+                        volleyError = new VolleyError(new String(volleyError.networkResponse.data));
+                    }
+
+                    return volleyError;
+                }
+
             };
+            request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 2, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             VolleySingleton.getInstance(context).addToRequestQueue(request);
        }
 
@@ -565,7 +591,7 @@ public class FeastAPI
 
 
 
-    public void registerUser(final  CreateUserCallback callback)
+   /* public void registerUser(final  CreateUserCallback callback)
     {
         final String href = this.baseURL + "/users";
         JSONObject object = null;
@@ -594,7 +620,7 @@ public class FeastAPI
         });
 
         VolleySingleton.getInstance(context).addToRequestQueue(request);
-    }
+    }*/
 
 
 
