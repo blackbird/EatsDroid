@@ -38,13 +38,18 @@
         android:visibility="invisible"/>
 </LinearLayout>
 
+    <android.support.v4.widget.SwipeRefreshLayout
 
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <ListView
         android:id="@+id/mealListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="@color/rowdividers"
         />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 
 

@@ -2,9 +2,12 @@ package com.example.sahil.myapplication;
 
 import android.app.DialogFragment;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,6 +71,20 @@ public class RestaurantFragment extends Fragment {
 
 
         View view = inflater.inflate(R.layout.restaurant_fragment, container, false); // false as third parameter?
+        SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swiperefresh);
+        refreshLayout.setColorSchemeResources(R.color.colorAccent);
+        refreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                       MainActivity ma = (MainActivity)getActivity();
+                       ma.fetchDataForDate(MainActivity.formatDate());
+                        MediaPlayer mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.tick); //sound effect
+                        mp.start();
+                    }
+                }
+        );
+
         return populateListView(view, savedInstanceState);
     }
 
@@ -455,6 +472,8 @@ public class RestaurantFragment extends Fragment {
     public void refreshView() {
 
 
+
+
         if (!MainActivity.menus.isEmpty()) {
 
             if (myListAdapter == null)
@@ -466,6 +485,29 @@ public class RestaurantFragment extends Fragment {
             myListAdapter.notifyDataSetChanged();
 
             if (getView() != null) {
+
+                SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout)getView().findViewById(R.id.swiperefresh);
+                if(refreshLayout.isRefreshing()) {
+                    Handler handler = new Handler();
+
+                    Runnable r = new Runnable() {
+                        public void run() {
+                            //end refreshing symbol on UI thread if refreshing
+                            SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swiperefresh);
+                            refreshLayout.setRefreshing(false);
+
+                        }
+                    };
+
+                    handler.postDelayed(r, 1500);
+                }
+
+
+
+
+
+
+
                 if (listItems.size() <= 1) {
                     ListView mealListView = (ListView) getView().findViewById(R.id.mealListView);
                     mealListView.setVisibility(View.INVISIBLE);
