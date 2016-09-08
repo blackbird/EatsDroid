@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 
 import feast.FeastAPI;
 import feast.FoodItem;
+import it.dex.movingimageviewlib.DexMovingImageView;
 
 /**
  * Created by Sahil on 4/11/16.
@@ -50,6 +52,7 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
 
         // assign the view we are converting to a local variable
         View view = convertView;
+
         final ListItemParent currentItem = objects.get(position);
         int itemViewType = -1;
         itemViewType = getViewItemType(currentItem);
@@ -70,10 +73,27 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
             } else if (itemViewType == ListItemParent.sectionHeader)
 
             {
-                view = inflater.inflate(R.layout.section_item_row, null);
+
+                if(view==null)
+                    view = inflater.inflate(R.layout.section_item_row, null);
+                else {
+                    TextView textView = (TextView)view.findViewById(R.id.sectionSeparator);
+                    if(textView!=null) {
+                        if (!(textView.getText().toString().trim().toLowerCase().contains(currentItem.getTitle().trim().toLowerCase()) || currentItem.getTitle().toLowerCase().trim().contains(textView.getText().toString().trim().toLowerCase()))) {
+                            view = inflater.inflate(R.layout.section_item_row, null);
+                        } else {
+                            return view;
+                        }
+                    } else {
+                        view = inflater.inflate(R.layout.section_item_row, null);
+                    }
+
+                }
                 TextView sectionSeparator = (TextView) view.findViewById(R.id.sectionSeparator);
                 sectionSeparator.setText(currentItem.getTitle());
-                setBackgroundHeader(currentItem.getTitle(), view.findViewById(R.id.section_layout));
+                DexMovingImageView movingImageView = (DexMovingImageView)view.findViewById(R.id.section_layout);
+                movingImageView.setValuesGenerator(new CustomValuesGenerator(movingImageView.getParameters()));
+                setBackgroundHeader(currentItem.getTitle(), movingImageView);
             }  else if(itemViewType == ListItemParent.dateHeader) {
                 view = inflater.inflate(R.layout.date_header_row, null);
                 TextView dateHeader = (TextView) view.findViewById(R.id.headerdate);
@@ -184,45 +204,45 @@ public class MyListAdapter extends ArrayAdapter<ListItemParent> {
     }
 
 
-    public void setBackgroundHeader(String name, View backgroundHeaderView) {
+    public void setBackgroundHeader(String name, ImageView backgroundHeaderView) {
         if (backgroundHeaderView != null) {
             name = name.trim().toLowerCase();
             if (name.contains("americana")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.americana);
+                backgroundHeaderView.setImageResource(R.drawable.americana);
             } else if (name.contains("bistro") || name.contains("expo station")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.bistro);
+                backgroundHeaderView.setImageResource(R.drawable.bistro);
             } else if (name.contains("bread")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.bread);
+                backgroundHeaderView.setImageResource(R.drawable.bread);
             } else if (name.contains("eurasia")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.eurasia);
+                backgroundHeaderView.setImageResource(R.drawable.eurasia);
             } else if (name.contains("deli")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.deli);
+                backgroundHeaderView.setImageResource(R.drawable.deli);
             } else if (name.contains("fruit") || name.contains("fresh from the") ) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.fruit);
+                backgroundHeaderView.setImageResource(R.drawable.fruit);
             } else if (name.contains("grainery")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.grainery);
+                backgroundHeaderView.setImageResource(R.drawable.grainery);
             } else if (name.contains("grill")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.grill);
+                backgroundHeaderView.setImageResource(R.drawable.grill);
             } else if (name.contains("line") && name.contains("hot")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.hotline);
+                backgroundHeaderView.setImageResource(R.drawable.hotline);
             } else if (name.contains("mongolian")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.mongolian);
+                backgroundHeaderView.setImageResource(R.drawable.mongolian);
             } else if (name.contains("pastries")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.pastries);
+                backgroundHeaderView.setImageResource(R.drawable.pastries);
             } else if (name.contains("pie") || name.contains("slice of pi")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.pie);
+                backgroundHeaderView.setImageResource(R.drawable.pie);
             } else if (name.contains("pizza")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.pizza);
+                backgroundHeaderView.setImageResource(R.drawable.pizza);
             } else if (name.contains("salad")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.salad);
+                backgroundHeaderView.setImageResource(R.drawable.salad);
             } else if (name.contains("soup")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.soup);
+                backgroundHeaderView.setImageResource(R.drawable.soup);
             } else if (name.contains("treats")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.treats);
+                backgroundHeaderView.setImageResource(R.drawable.treats);
             } else if(name.contains("allerg")) {
-                backgroundHeaderView.setBackgroundResource(R.drawable.allergy);
+                backgroundHeaderView.setImageResource(R.drawable.allergy);
             } else {
-                backgroundHeaderView.setBackgroundResource(R.drawable.entree);
+                backgroundHeaderView.setImageResource(R.drawable.entree);
             }
         }
     }

@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
         if (mViewPager != null) {
             mViewPager.setAdapter(mSectionsPagerAdapter);
         }
-
+        mViewPager.setPageTransformer(false, new FadePageTransformer());
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         if (tabLayout != null) {
@@ -324,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
 
             Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
             startActivity(intent);
-            finish();
             this.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
         } /*else if (id == R.id.action_calendar) {
@@ -439,6 +438,21 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             return restaurants.get(titles[position].toString());
+        }
+    }
+
+    public class FadePageTransformer implements ViewPager.PageTransformer {
+        public void transformPage(View view, float position) {
+            //view.setTranslationX(view.getWidth() * -position);
+
+            if(position <= -1.0F || position >= 1.0F) {
+                view.setAlpha(0.0F);
+            } else if( position == 0.0F ) {
+                view.setAlpha(1.0F);
+            } else {
+                // position is between -1.0F & 0.0F OR 0.0F & 1.0F
+                view.setAlpha(1.0F - Math.abs(position));
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dex="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="#000000"
@@ -9,14 +10,19 @@
         android:layout_width="match_parent"
         android:layout_height="70dp">
 
-        
 
 
-        <LinearLayout
+
+        <it.dex.movingimageviewlib.DexMovingImageView
+
             android:id="@+id/section_layout"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:orientation="vertical"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            dex:zoom="2"
+            dex:evaluator="gyroscopeBased"
+            dex:generator="base"
+            dex:drawer="scale|translate"
+            />
         <View
             android:layout_width="match_parent"
             android:layout_height="70dp"
